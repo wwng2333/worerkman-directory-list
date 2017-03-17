@@ -68,6 +68,8 @@ function make_list($array) {
 	#var_dump($array);
 	if(!$array) return false;
 	$str = '';
+	$GLOBALS['total_files'] = 0;
+	$GLOBALS['total_size'] = 0;
 	for($i=0;$i<count($array['name']);$i++) {
 		$file_now = $array['name'][$i];
 		$size_now = formatsize($array['size'][$i]);
@@ -80,17 +82,21 @@ function make_list($array) {
 		$str .= "<td align=\"right\"> $size_now</td><td>&nbsp;</td>\n";
 		$str .= "<td align=\"right\"><a href=\"?delete=$file_now\" onclick=\"return confirm('确定要删除吗？')\"> 删除</a></td>\n";
 		$str .= "</tr>\n";
+		$GLOBALS['total_files']++;
+		$GLOBALS['total_size'] += $array['size'][$i];
 	}
+	
 	return $str;
 }
 
 function get_full_html($table, $data) {
+	$GLOBALS['total_size'] = formatsize($GLOBALS['total_size']);
 	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of /</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}</script>\n</head>\n<body>\n<strong>Demo 下载</strong>\n";
 	$footer = "<address>%s</address>\n</body>\n</html>";
 	$template_a = $header.'<p>没有文件</p>'.$footer;
 	$template = $header.'<table><th><img src="data:image/gif;base64,R0lGODlhFAAWAKEAAP///8z//wAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAABACwAAAAAFAAWAAACE4yPqcvtD6OctNqLs968+w+GSQEAOw==" alt="[ICO]"></th><th><a href="?sort=name">名称</a></th><th><a href="?sort=mtime">最后更改</a></th><th><a href="?sort=duration">持续时间</a></th><th><a href="?sort=size">大小</a></th></tr><tr><th colspan="6"><hr></th></tr>%s<tr><th colspan="6"><hr></th></tr></table>'.$footer;
 	if(!$table) return sprintf($template_a, get_ver($data));
-	return sprintf($template, $table, get_ver($data));
+	return sprintf($template, $table, "{$GLOBALS['total_files']} files, total {$GLOBALS['total_size']}.</br>".get_ver($data));
 }
 
 $http_worker = new Worker("http://0.0.0.0:12101");
