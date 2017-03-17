@@ -31,6 +31,7 @@ function get_create_time($filename) {
 	$temp = explode('_', $filename);
 	if(isset($temp[0]) and strlen($temp[0]) == 14) return strtotime($temp[0]);
 }
+
 function read_dir($dir, $sort = 'mtime', $order = SORT_DESC) {
 	$handler = opendir($dir);
 	while($filename = readdir($handler)) {
@@ -73,6 +74,7 @@ function make_list($array) {
 		$mtime_now = date("Y-m-d H:i", $array['mtime'][$i]);
 		$duration = floor($array['duration'][$i] / 60);
 		$str .= "<tr>\n";
+		$str .= "<td valign=\"top\"><img src=\"data:image/gif;base64,R0lGODlhFAAWAMIAAP///8z//8zMzJmZmTMzMwAAAAAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAABACwAAAAAFAAWAAADaUi6vPEwEECrnSS+WQoQXSEAE6lxXgeopQmha+q1rhTfakHo/HaDnVFo6LMYKYPkoOADim4VJdOWkx2XvirUgqVaVcbuxCn0hKe04znrIV/ROOvaG3+z63OYO6/uiwlKgYJJOxFDh4hTCQA7\" alt=\"[   ]\"></td>";
 		$str .= "<td><a href=\"?download=$file_now\"> $file_now</a></td>\n";
 		$str .= "<td align=\"right\"> $mtime_now</td>\n";
 		$str .= "<td align=\"right\"> $duration 分钟</td>\n";
