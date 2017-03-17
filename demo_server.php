@@ -74,8 +74,7 @@ function make_list($array) {
 		$mtime_now = date("Y-m-d H:i", $array['mtime'][$i]);
 		$duration = floor($array['duration'][$i] / 60);
 		$str .= "<tr>\n";
-		$str .= "<td valign=\"top\"><img src=\"data:image/gif;base64,R0lGODlhFAAWAMIAAP///8z//8zMzJmZmTMzMwAAAAAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAABACwAAAAAFAAWAAADaUi6vPEwEECrnSS+WQoQXSEAE6lxXgeopQmha+q1rhTfakHo/HaDnVFo6LMYKYPkoOADim4VJdOWkx2XvirUgqVaVcbuxCn0hKe04znrIV/ROOvaG3+z63OYO6/uiwlKgYJJOxFDh4hTCQA7\" alt=\"[   ]\"></td>";
-		$str .= "<td><a href=\"?download=$file_now\"> $file_now</a></td>\n";
+		$str .= "<td><img src=\"data:image/gif;base64,R0lGODlhFAAWAMIAAP///8z//8zMzJmZmTMzMwAAAAAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAABACwAAAAAFAAWAAADaUi6vPEwEECrnSS+WQoQXSEAE6lxXgeopQmha+q1rhTfakHo/HaDnVFo6LMYKYPkoOADim4VJdOWkx2XvirUgqVaVcbuxCn0hKe04znrIV/ROOvaG3+z63OYO6/uiwlKgYJJOxFDh4hTCQA7\" alt=\"[   ]\"></td><td> <a href=\"?download=$file_now\">$file_now</a></td>\n";
 		$str .= "<td align=\"right\"> $mtime_now</td>\n";
 		$str .= "<td align=\"right\"> $duration 分钟</td>\n";
 		$str .= "<td align=\"right\"> $size_now</td><td>&nbsp;</td>\n";
@@ -86,10 +85,10 @@ function make_list($array) {
 }
 
 function get_full_html($table, $data) {
-	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of /</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}</script>\n</head>\n<body>\n<strong>Demo 下载</strong>\n";
+	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of /</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}</script>\n</head>\n<body>\n<strong>Demo 下载</strong>\n";
 	$footer = "<address>%s</address>\n</body>\n</html>";
 	$template_a = $header.'<p>没有文件</p>'.$footer;
-	$template = $header.'<table><tr><th><a>名称</a></th><th><a>最后更改</a></th><th><a>持续时间</a></th><th><a>大小</a></th></tr><tr><th colspan="5"><hr></th></tr>%s<tr><th colspan="5"><hr></th></tr></table>'.$footer;
+	$template = $header.'<table><th><img src="data:image/gif;base64,R0lGODlhFAAWAKEAAP///8z//wAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAABACwAAAAAFAAWAAACE4yPqcvtD6OctNqLs968+w+GSQEAOw==" alt="[   ]"></th><th><a>名称</a></th></th><th><a>最后更改</a></th><th><a>持续时间</a></th><th><a>大小</a></th></tr><tr><th colspan="6"><hr></th></tr>%s<tr><th colspan="6"><hr></th></tr></table>'.$footer;
 	if(!$table) return sprintf($template_a, get_ver($data));
 	return sprintf($template, $table, get_ver($data));
 }
