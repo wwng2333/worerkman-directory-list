@@ -35,7 +35,7 @@ function read_dir($dir, $sort = 'name', $order = SORT_DESC) {
 	foreach($list as $k => $name) {
 		$file_name[] = $name;
 		$real_path = $dir.$name;
-		$is_dir[] = scandir($real_path) ? true : false;
+		$is_dir[] = @scandir($real_path) ? true : false;
 		$file_size[] = filesize($real_path);
 		$file_mtime[] = filemtime($real_path);
 	}
@@ -112,12 +112,13 @@ $http_worker->onMessage = function($connection, $data) {
 		if(substr($_GET['dir'], '-1') !== '/') $_GET['dir'] .= '/';
 	}
 	if(isset($_GET['download'])) {
-		$file_path = $GLOBALS['path'].$_GET['dir'].$_GET['download'];
-		if(is_readable($file_path)) {
+		$tmp = explode('/', $_GET['download']);
+		$file_name = end($tmp);
+		if(is_readable($_GET['download'])) {
 			Http::header("Content-type: text/plain");
 			Http::header("Accept-Ranges: bytes");
-			Http::header("Content-Disposition: attachment; filename=".$_GET['download']);
-			$connection->send(file_get_contents($file_path));
+			Http::header("Content-Disposition: attachment; filename=".$file_name);
+			$connection->send(file_get_contents($_GET['download']));
 		} else {
 			Http::header("HTTP/1.1 404 Not Found");
 		}
