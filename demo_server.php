@@ -64,7 +64,7 @@ function make_list($array) {
 		if($array['dir'][$i]) {
 			$mtime_now = date("Y-m-d H:i", $array['mtime'][$i]);
 			$str .= "<tr>\n";
-			$str .= "<td><img src=\"data:image/gif;base64,R0lGODlhFAAWAMIAAP/////Mmcz//5lmMzMzMwAAAAAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAACACwAAAAAFAAWAAADVCi63P4wyklZufjOErrvRcR9ZKYpxUB6aokGQyzHKxyO9RoTV54PPJyPBewNSUXhcWc8soJOIjTaSVJhVphWxd3CeILUbDwmgMPmtHrNIyxM8Iw7AQA7\" alt=\"[   ]\"></td><td> <a href=\"?dir=$file_now\">$file_now</a></td>\n";
+			$str .= "<td><img src=\"data:image/gif;base64,R0lGODlhFAAWAMIAAP/////Mmcz//5lmMzMzMwAAAAAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAACACwAAAAAFAAWAAADVCi63P4wyklZufjOErrvRcR9ZKYpxUB6aokGQyzHKxyO9RoTV54PPJyPBewNSUXhcWc8soJOIjTaSVJhVphWxd3CeILUbDwmgMPmtHrNIyxM8Iw7AQA7\" alt=\"[DIR]\"></td><td> <a href=\"?dir=$file_now\">$file_now</a></td>\n";
 			$str .= "<td align=\"right\"> $mtime_now</td>\n";
 			$str .= "<td align=\"right\"> -</td><td>&nbsp;</td>\n";
 			$str .= "<td align=\"right\"><a href=\"?delete=$file_now\" onclick=\"return confirm('确定要删除吗？')\"> 删除</a></td>\n";
