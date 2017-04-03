@@ -85,7 +85,7 @@ function make_list($dir, $array, $path) {
 			$str .= "<td><img src=\"?gif=dir\" alt=\"[DIR]\"></td><td> <a href=\"?dir=$real_path\">$name/</a></td>\n";
 			$str .= "<td align=\"right\"> $mtime_now</td>\n";
 			$str .= "<td align=\"right\"> -</td><td>&nbsp;</td>\n";
-			$str .= "<td align=\"right\"><a href=\"?delete=$name\" onclick=\"return confirm('确定要删除吗？')\"> 删除</a></td>\n";
+			$str .= "<td align=\"right\"><a href=\"?delete=$name\" onclick=\"del()\"> 删除</a></td>\n";
 			$str .= "</tr>\n";
 			$GLOBALS['total_files']++;
 		} else {
@@ -95,7 +95,7 @@ function make_list($dir, $array, $path) {
 			$str .= "<td><img src=\"?gif=blank\" alt=\"[   ]\"></td><td> <a href=\"?download=$real_path\">$name</a></td>\n";
 			$str .= "<td align=\"right\"> $mtime_now</td>\n";
 			$str .= "<td align=\"right\"> $size_now</td><td>&nbsp;</td>\n";
-			$str .= "<td align=\"right\"><a href=\"?delete=$name\" onclick=\"return confirm('确定要删除吗？')\"> 删除</a></td>\n";
+			$str .= "<td align=\"right\"><a href=\"?delete=$name\" onclick=\"del()\"> 删除</a></td>\n";
 			$str .= "</tr>\n";
 			$GLOBALS['total_files']++;
 			$GLOBALS['total_size'] += $array['size'][$i];
@@ -114,7 +114,7 @@ function get_full_html($path, $sort, $data) {
 	$real_path = str_replace('//', '/', $GLOBALS['path'].$path);
 	$table = make_list($real_path, read_dir($real_path, $sort), $path);
 	$GLOBALS['total_size'] = formatsize($GLOBALS['total_size']);
-	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of /</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}</script>\n</head>\n<body>\n<strong>$real_path 的索引</strong>\n";
+	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of /</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}function del(){return confirm('确定要删除吗？')}</script>\n</head>\n<body>\n<strong>$real_path 的索引</strong>\n";
 	$footer = upload_html($path)."<address>%s</address>\n</body>\n</html>";
 	$template_a = $header.'<p>没有文件</p>'.$footer;
 	$template = $header."<table><th><img src=\"?gif=ico\" alt=\"[ICO]\"></th><th><a href=\"?dir=$path&sort=name\">名称</a></th><th><a href=\"?dir=$path&sort=mtime\">最后更改</a></th><th><a href=\"?dir=$path&sort=size\">大小</a></th></tr><tr><th colspan=\"6\"><hr></th></tr>%s<tr><th colspan=\"6\"><hr></th></tr></table>".$footer;
