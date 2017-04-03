@@ -54,6 +54,10 @@ function read_dir($dir, $sort = 'name', $order = SORT_DESC) {
 	return (isset($file_name)) ? array('name' => $file_name, 'size' => $file_size, 'mtime' => $file_mtime, 'dir' => $is_dir) : false;
 }
 
+function parentdir($where) {
+	return "<tr><td valign=\"top\"><img src=\"?gif=parentdir\" alt=\"[PARENTDIR]\"></td><td><a href=\"?dir=$where\">Parent Directory</a></td><td>&nbsp;</td><td align=\"right\">  - </td><td>&nbsp;</td></tr>";
+}
+
 function make_list($dir, $array, $path) {
 	if(!$array) return false;
 	$path = rtrim($path, '/');
@@ -70,7 +74,7 @@ function make_list($dir, $array, $path) {
 			unset($tmp[$count]);
 			$tmp = implode('/', $tmp);
 		}
-		$str .= "<tr><td valign=\"top\"><img src=\"?gif=parentdir\" alt=\"[PARENTDIR]\"></td><td><a href=\"?dir=$tmp\">Parent Directory</a></td><td>&nbsp;</td><td align=\"right\">  - </td><td>&nbsp;</td></tr>";
+		$str .= parentdir($tmp);
 	}
 	for($i=0;$i<count($array['name']);$i++) {
 		$name = $array['name'][$i];
@@ -101,12 +105,17 @@ function make_list($dir, $array, $path) {
 	return $str;
 }
 
+function upload_html($path) {
+	$real_path = str_replace('//', '/', $GLOBALS['path'].$path);
+	return '<form action="upload" method="post" enctype="multipart/form-data"><input type="hidden" name="topath"  value="'.$real_path.'" /><input type="file" name="file" id="file" /><input type="submit" name="submit" value="上传" /></form>';
+}
+
 function get_full_html($path, $sort, $data) {
 	$real_path = str_replace('//', '/', $GLOBALS['path'].$path);
 	$table = make_list($real_path, read_dir($real_path, $sort), $path);
 	$GLOBALS['total_size'] = formatsize($GLOBALS['total_size']);
 	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of /</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}</script>\n</head>\n<body>\n<strong>$real_path 的索引</strong>\n";
-	$footer = "<address>%s</address>\n</body>\n</html>";
+	$footer = upload_html($path)."<address>%s</address>\n</body>\n</html>";
 	$template_a = $header.'<p>没有文件</p>'.$footer;
 	$template = $header."<table><th><img src=\"?gif=ico\" alt=\"[ICO]\"></th><th><a href=\"?dir=$path&sort=name\">名称</a></th><th><a href=\"?dir=$path&sort=mtime\">最后更改</a></th><th><a href=\"?dir=$path&sort=size\">大小</a></th></tr><tr><th colspan=\"6\"><hr></th></tr>%s<tr><th colspan=\"6\"><hr></th></tr></table>".$footer;
 	if(!$table) return sprintf($template_a, get_ver($data));
@@ -116,8 +125,22 @@ function get_full_html($path, $sort, $data) {
 $http_worker = new Worker("http://0.0.0.0:12101");
 $http_worker->count = 4;
 $http_worker->onMessage = function($connection, $data) {
+	var_dump($data);
 	$GLOBALS['time_start'] = microtime(true);
 	$GLOBALS['queries'] = 0;
+	$go_back = '</br><img src="?gif=parentdir" alt="[PARENTDIR]"> <a href="#" onClick="javascript:history.go(-1);">返回上一页</a>';
+	if(!empty($data['files'])) {
+		$topath = empty($_POST['topath']) ? '/' : $_POST['topath'];
+		if(substr($topath, '-1') !== '/') $topath .= '/';
+		foreach($data['files'] as $array) {
+			$file_size = file_put_contents($topath.$array['file_name'], $array['file_data']);
+			if($file_size == $array['file_size']) {
+				$connection->send('上传成功'.$go_back);
+			} else {
+				$connection->send('上传失败'.$go_back);
+			}
+		}
+	}
 	if(isset($_GET['gif'])) {
 		switch($_GET['gif']) {
 			case 'parentdir':
