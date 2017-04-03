@@ -54,18 +54,31 @@ function read_dir($dir, $sort = 'name', $order = SORT_DESC) {
 	return (isset($file_name)) ? array('name' => $file_name, 'size' => $file_size, 'mtime' => $file_mtime, 'dir' => $is_dir) : false;
 }
 
-function make_list($dir, $array) { 
+function make_list($dir, $array, $path) {
 	if(!$array) return false;
+	$path = rtrim($path, '/');
 	$str = '';
 	$GLOBALS['total_files'] = 0;
 	$GLOBALS['total_size'] = 0;
+	if(!empty($path)) {
+		$tmp = explode('/', $path);
+		var_dump($path,$tmp);
+		if(count($tmp) == 2) {
+			$tmp = '/';
+		} else {
+			$count = count($tmp) - 1;
+			unset($tmp[$count]);
+			$tmp = implode('/', $tmp);
+		}
+		$str .= "<tr><td valign=\"top\"><img src=\"?gif=parentdir\" alt=\"[PARENTDIR]\"></td><td><a href=\"?dir=$tmp\">Parent Directory</a></td><td>&nbsp;</td><td align=\"right\">  - </td><td>&nbsp;</td></tr>";
+	}
 	for($i=0;$i<count($array['name']);$i++) {
 		$name = $array['name'][$i];
 		$real_path = str_replace('//', '/', $dir.$name);
 		if($array['dir'][$i]) {
 			$mtime_now = date("Y-m-d H:i", $array['mtime'][$i]);
 			$str .= "<tr>\n";
-			$str .= "<td><img src=\"?gif=dir\" alt=\"[DIR]\"></td><td> <a href=\"?dir=$real_path\">$name</a></td>\n";
+			$str .= "<td><img src=\"?gif=dir\" alt=\"[DIR]\"></td><td> <a href=\"?dir=$real_path\">$name/</a></td>\n";
 			$str .= "<td align=\"right\"> $mtime_now</td>\n";
 			$str .= "<td align=\"right\"> -</td><td>&nbsp;</td>\n";
 			$str .= "<td align=\"right\"><a href=\"?delete=$name\" onclick=\"return confirm('确定要删除吗？')\"> 删除</a></td>\n";
@@ -89,13 +102,13 @@ function make_list($dir, $array) {
 }
 
 function get_full_html($path, $sort, $data) {
-	$path = str_replace('//', '/', $path);
-	$table = make_list($path, read_dir($path, $sort));
+	$real_path = str_replace('//', '/', $GLOBALS['path'].$path);
+	$table = make_list($real_path, read_dir($real_path, $sort), $path);
 	$GLOBALS['total_size'] = formatsize($GLOBALS['total_size']);
-	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of /</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}</script>\n</head>\n<body>\n<strong>$path 的索引</strong>\n";
+	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of /</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}</script>\n</head>\n<body>\n<strong>$real_path 的索引</strong>\n";
 	$footer = "<address>%s</address>\n</body>\n</html>";
 	$template_a = $header.'<p>没有文件</p>'.$footer;
-	$template = $header.'<table><th><img src="?gif=ico" alt="[ICO]"></th><th><a href="?sort=name">名称</a></th><th><a href="?sort=mtime">最后更改</a></th><th><a href="?sort=size">大小</a></th></tr><tr><th colspan="6"><hr></th></tr>%s<tr><th colspan="6"><hr></th></tr></table>'.$footer;
+	$template = $header."<table><th><img src=\"?gif=ico\" alt=\"[ICO]\"></th><th><a href=\"?dir=$path&sort=name\">名称</a></th><th><a href=\"?dir=$path&sort=mtime\">最后更改</a></th><th><a href=\"?dir=$path&sort=size\">大小</a></th></tr><tr><th colspan=\"6\"><hr></th></tr>%s<tr><th colspan=\"6\"><hr></th></tr></table>".$footer;
 	if(!$table) return sprintf($template_a, get_ver($data));
 	return sprintf($template, $table, "{$GLOBALS['total_files']} files, total {$GLOBALS['total_size']}.</br>".get_ver($data));
 }
@@ -107,18 +120,25 @@ $http_worker->onMessage = function($connection, $data) {
 	$GLOBALS['queries'] = 0;
 	if(isset($_GET['gif'])) {
 		switch($_GET['gif']) {
-			case 'dir' :
+			case 'parentdir':
+				$gif = 'R0lGODlhFAAWAMIAAP///8z//5mZmWZmZjMzMwAAAAAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAABACwAAAAAFAAWAAADSxi63P4jEPJqEDNTu6LO3PVpnDdOFnaCkHQGBTcqRRxuWG0v+5LrNUZQ8QPqeMakkaZsFihOpyDajMCoOoJAGNVWkt7QVfzokc+LBAA7';
+			break;
+			case 'dir':
 				$gif = 'R0lGODlhFAAWAMIAAP/////Mmcz//5lmMzMzMwAAAAAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAACACwAAAAAFAAWAAADVCi63P4wyklZufjOErrvRcR9ZKYpxUB6aokGQyzHKxyO9RoTV54PPJyPBewNSUXhcWc8soJOIjTaSVJhVphWxd3CeILUbDwmgMPmtHrNIyxM8Iw7AQA7';
 			break;
-			case 'ico' :
+			case 'ico':
 				$gif = 'R0lGODlhFAAWAKEAAP///8z//wAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAABACwAAAAAFAAWAAACE4yPqcvtD6OctNqLs968+w+GSQEAOw==';
 			break;
-			case 'blank' :
+			case 'blank':
 				$gif = 'R0lGODlhFAAWAMIAAP///8z//8zMzJmZmTMzMwAAAAAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9tYWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAABACwAAAAAFAAWAAADaUi6vPEwEECrnSS+WQoQXSEAE6lxXgeopQmha+q1rhTfakHo/HaDnVFo6LMYKYPkoOADim4VJdOWkx2XvirUgqVaVcbuxCn0hKe04znrIV/ROOvaG3+z63OYO6/uiwlKgYJJOxFDh4hTCQA7';
+			break;
+			default:
+				Http::header("HTTP/1.1 404 Not Found");
 			break;
 		}
 		Http::header("Content-type: image/gif");
 		$connection->send(base64_decode($gif));
+		Worker::stopAll();
 	}
 	if(!isset($_GET['sort'])) $_GET['sort'] = false;
 	if(!isset($_GET['dir'])) {
@@ -141,7 +161,7 @@ $http_worker->onMessage = function($connection, $data) {
 		unlink($GLOBALS['path'].$_GET['delete']);
 		$connection->send('<script>history.go(-1)</script>');
 	} else {
-		$connection->send(get_full_html($GLOBALS['path'].$_GET['dir'], $_GET['sort'], $data));
+		$connection->send(get_full_html($_GET['dir'], $_GET['sort'], $data));
 	}
 };
 
