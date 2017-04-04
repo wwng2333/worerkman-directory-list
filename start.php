@@ -58,6 +58,39 @@ function parentdir($where) {
 	return "<tr><td valign=\"top\"><img src=\"?gif=parentdir\" alt=\"[PARENTDIR]\"></td><td><a href=\"?dir=$where\">Parent Directory</a></td><td>&nbsp;</td><td align=\"right\">  - </td><td>&nbsp;</td></tr>";
 }
 
+function del($name) {
+	return "<td align=\"right\"><a href=\"?delete=$name\" onclick=\"del()\"> 删除</a></td>\n";
+}
+
+function mtime($mtime) {
+	return "<td align=\"right\"> $mtime</td>\n";
+}
+
+function size($size) {
+	return "<td align=\"right\"> $size</td><td>&nbsp;</td>\n";
+}
+
+function gif($gif, $alt) {
+	return "<td><img src=\"?gif={$gif}\" alt=\"[{$alt}]\"></td>";
+}
+
+function html($what) {
+	if(!isset($GLOBALS[$what])) $GLOBALS[$what] = false;
+	if($GLOBALS[$what]) {
+		$GLOBALS[$what] = false;
+		return "</$what>";
+	} else {
+		$GLOBALS[$what] = true;
+		return "<$what>";
+	}
+}
+
+function link_to($mode, $real_path, $name) {
+	if($mode == 'dir') $name .= '/';
+	$what = ($mode == 'dir') ? 'dir' : 'download';
+	return "<a href=\"?{$what}=$real_path\">$name</a>";
+}
+
 function make_list($dir, $array, $path) {
 	if(!$array) return false;
 	$path = rtrim($path, '/');
@@ -66,7 +99,6 @@ function make_list($dir, $array, $path) {
 	$GLOBALS['total_size'] = 0;
 	if(!empty($path)) {
 		$tmp = explode('/', $path);
-		var_dump($path,$tmp);
 		if(count($tmp) == 2) {
 			$tmp = '/';
 		} else {
@@ -81,22 +113,14 @@ function make_list($dir, $array, $path) {
 		$real_path = str_replace('//', '/', $dir.$name);
 		if($array['dir'][$i]) {
 			$mtime_now = date("Y-m-d H:i", $array['mtime'][$i]);
-			$str .= "<tr>\n";
-			$str .= "<td><img src=\"?gif=dir\" alt=\"[DIR]\"></td><td> <a href=\"?dir=$real_path\">$name/</a></td>\n";
-			$str .= "<td align=\"right\"> $mtime_now</td>\n";
-			$str .= "<td align=\"right\"> -</td><td>&nbsp;</td>\n";
-			$str .= "<td align=\"right\"><a href=\"?delete=$name\" onclick=\"del()\"> 删除</a></td>\n";
-			$str .= "</tr>\n";
+			$str .= html('tr').gif('dir', 'DIR').html('td').link_to('dir', $real_path, $name).html('td');
+			$str .= mtime($mtime_now).size('-').del($real_path).html('tr');
 			$GLOBALS['total_files']++;
 		} else {
 			$size_now = formatsize($array['size'][$i]);
 			$mtime_now = date("Y-m-d H:i", $array['mtime'][$i]);
-			$str .= "<tr>\n";
-			$str .= "<td><img src=\"?gif=blank\" alt=\"[   ]\"></td><td> <a href=\"?download=$real_path\">$name</a></td>\n";
-			$str .= "<td align=\"right\"> $mtime_now</td>\n";
-			$str .= "<td align=\"right\"> $size_now</td><td>&nbsp;</td>\n";
-			$str .= "<td align=\"right\"><a href=\"?delete=$name\" onclick=\"del()\"> 删除</a></td>\n";
-			$str .= "</tr>\n";
+			$str .= html('tr').gif('blank', '   ').html('td').link_to('download', $real_path, $name).html('td');
+			$str .= mtime($mtime_now).size($size_now).del($real_path).html('tr');
 			$GLOBALS['total_files']++;
 			$GLOBALS['total_size'] += $array['size'][$i];
 		}
@@ -125,7 +149,6 @@ function get_full_html($path, $sort, $data) {
 $http_worker = new Worker("http://0.0.0.0:12101");
 $http_worker->count = 4;
 $http_worker->onMessage = function($connection, $data) {
-	var_dump($data);
 	$GLOBALS['time_start'] = microtime(true);
 	$GLOBALS['queries'] = 0;
 	$go_back = '</br><img src="?gif=parentdir" alt="[PARENTDIR]"> <a href="#" onClick="javascript:history.go(-1);">返回上一页</a>';
