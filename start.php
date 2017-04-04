@@ -129,18 +129,6 @@ $http_worker->onMessage = function($connection, $data) {
 	$GLOBALS['time_start'] = microtime(true);
 	$GLOBALS['queries'] = 0;
 	$go_back = '</br><img src="?gif=parentdir" alt="[PARENTDIR]"> <a href="#" onClick="javascript:history.go(-1);">返回上一页</a>';
-	if(!empty($data['files'])) {
-		$topath = empty($_POST['topath']) ? '/' : $_POST['topath'];
-		if(substr($topath, '-1') !== '/') $topath .= '/';
-		foreach($data['files'] as $array) {
-			$file_size = file_put_contents($topath.$array['file_name'], $array['file_data']);
-			if($file_size == $array['file_size']) {
-				$connection->send('上传成功'.$go_back);
-			} else {
-				$connection->send('上传失败'.$go_back);
-			}
-		}
-	}
 	if(isset($_GET['gif'])) {
 		switch($_GET['gif']) {
 			case 'parentdir':
@@ -162,6 +150,18 @@ $http_worker->onMessage = function($connection, $data) {
 		Http::header("Content-type: image/gif");
 		$connection->send(base64_decode($gif));
 		Worker::stopAll();
+	}
+	if(count($data['files']) > 0) {
+		$topath = empty($_POST['topath']) ? '/' : $_POST['topath'];
+		if(substr($topath, '-1') !== '/') $topath .= '/';
+		foreach($data['files'] as $array) {
+			$file_size = file_put_contents($topath.$array['file_name'], $array['file_data']);
+			if($file_size == $array['file_size']) {
+				$connection->send('上传成功'.$go_back);
+			} else {
+				$connection->send('上传失败'.$go_back);
+			}
+		}
 	}
 	if(!isset($_GET['sort'])) $_GET['sort'] = false;
 	if(!isset($_GET['dir'])) {
