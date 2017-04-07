@@ -63,10 +63,12 @@ function read_dir($dir, $sort = 'name', $order = SORT_DESC) {
 }
 
 function parentdir($where) {
+	$where = urlencode($where);
 	return "<tr><td valign=\"top\"><img src=\"?gif=parentdir\" alt=\"[PARENTDIR]\"></td><td><a href=\"?dir=$where\">Parent Directory</a></td><td>&nbsp;</td><td align=\"right\">  - </td><td>&nbsp;</td></tr>";
 }
 
 function del($name) {
+	$name = urlencode($name);
 	return "<td align=\"right\"><a href=\"?delete=$name\" onclick=\"del()\"> 删除</a></td>\n";
 }
 
@@ -94,6 +96,7 @@ function html($what) {
 }
 
 function link_to($mode, $real_path, $name) {
+	$real_path = urlencode($real_path);
 	if($mode == 'dir') $name .= '/';
 	$what = ($mode == 'dir') ? 'dir' : 'download';
 	return "<a href=\"?{$what}=$real_path\">$name</a>";
@@ -145,12 +148,12 @@ function get_full_html($path, $sort, $data) {
 	$real_path = str_replace('//', '/', $GLOBALS['path'].$path);
 	$table = make_list($real_path, read_dir($real_path, $sort), $path);
 	$GLOBALS['total_size'] = formatsize($GLOBALS['total_size']);
-	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of %s</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}function del(){return confirm('确定要删除吗？')}</script>\n</head>\n<body>\n<strong>$real_path 的索引</strong>\n";
+	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>%s 的索引</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}function del(){return confirm('确定要删除吗？')}</script>\n</head>\n<body>\n<strong>$real_path 的索引</strong>\n";
 	$footer = upload_html($path)."<address>%s</address>\n</body>\n</html>";
-	$template_a = sprintf($header, $path).'<p>没有文件</p>'.$footer;
-	$template = sprintf($header, $path)."<table><th><img src=\"?gif=ico\" alt=\"[ICO]\"></th><th><a href=\"?dir=$path&sort=name\">名称</a></th><th><a href=\"?dir=$path&sort=mtime\">最后更改</a></th><th><a href=\"?dir=$path&sort=size\">大小</a></th></tr><tr><th colspan=\"6\"><hr></th></tr>%s<tr><th colspan=\"6\"><hr></th></tr></table>".$footer;
+	$template_a = sprintf($header, $real_path).'<p>没有文件</p>'.$footer;
+	$template = sprintf($header, $real_path)."<table><th><img src=\"?gif=ico\" alt=\"[ICO]\"></th><th><a href=\"?dir=$real_path&sort=name\">名称</a></th><th><a href=\"?dir=$real_path&sort=mtime\">最后更改</a></th><th><a href=\"?dir=$real_path&sort=size\">大小</a></th></tr><tr><th colspan=\"6\"><hr></th></tr>%s<tr><th colspan=\"6\"><hr></th></tr></table>".$footer;
 	if(!$table) return sprintf($template_a, get_ver($data));
-	return sprintf($template, $table, "当前目录下共 {$GLOBALS['total_files']} 文件和文件夹, 总计 {$GLOBALS['total_size']}.</br>".get_ver($data));
+	return sprintf($template, $table, "当前目录下共 {$GLOBALS['total_files']} 文件或文件夹, 总计 {$GLOBALS['total_size']}.</br>".get_ver($data));
 }
 
 $http_worker = new Worker("http://0.0.0.0:12101");
