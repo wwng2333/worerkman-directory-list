@@ -21,12 +21,20 @@ function formatsize($size, $key = 0) {
 	}
 }
 
+function disk_usage() {
+	$total = disk_total_space(".");
+	$free = disk_free_space(".");
+	$used = round(($total - $free) / $total * 100, 2).'%';
+	$html = '%s 可用, 共 %s, 使用率 %s</br>';
+	return sprintf($html, formatsize($free), formatsize($total), $used);
+}
+
 function get_ver($data) {
 	$_d = $data['server'];
 	$time_usage = round((microtime(true) - $GLOBALS['time_start']) * 1000, 4);
 	$mem_usage = round(memory_get_usage()/1024/1024, 2);
-	$_s = "Processed in {$time_usage} ms , {$mem_usage} MB memory used , {$GLOBALS['queries']} queries.</br>\n";
-	return sprintf($_s.'%s Server at %s Port %s', $_d['SERVER_SOFTWARE'], $_d['SERVER_NAME'], $_d['SERVER_PORT']);
+	$_s = "Processed in {$time_usage} ms , {$mem_usage} MB memory used.\n";
+	return disk_usage().sprintf($_s.'</br>%s Server at %s Port %s', $_d['SERVER_SOFTWARE'], $_d['SERVER_NAME'], $_d['SERVER_PORT']);
 }
 
 function read_dir($dir, $sort = 'name', $order = SORT_DESC) {
@@ -124,7 +132,6 @@ function make_list($dir, $array, $path) {
 			$GLOBALS['total_files']++;
 			$GLOBALS['total_size'] += $array['size'][$i];
 		}
-		$GLOBALS['queries']++;
 	}
 	return $str;
 }
@@ -138,19 +145,18 @@ function get_full_html($path, $sort, $data) {
 	$real_path = str_replace('//', '/', $GLOBALS['path'].$path);
 	$table = make_list($real_path, read_dir($real_path, $sort), $path);
 	$GLOBALS['total_size'] = formatsize($GLOBALS['total_size']);
-	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of /</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}function del(){return confirm('确定要删除吗？')}</script>\n</head>\n<body>\n<strong>$real_path 的索引</strong>\n";
+	$header = "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.0//EN\" \"http://www.wapforum.org/DTD/xhtml-mobile10.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<title>Index of %s</title>\n<style type=\"text/css\" media=\"screen\">pre{background:0 0}body{margin:2em}tb{width:600px;margin:0 auto}</style>\n<script>if(window.name!=\"bencalie\"){location.reload();window.name=\"bencalie\"}else{window.name=\"\"}function del(){return confirm('确定要删除吗？')}</script>\n</head>\n<body>\n<strong>$real_path 的索引</strong>\n";
 	$footer = upload_html($path)."<address>%s</address>\n</body>\n</html>";
-	$template_a = $header.'<p>没有文件</p>'.$footer;
-	$template = $header."<table><th><img src=\"?gif=ico\" alt=\"[ICO]\"></th><th><a href=\"?dir=$path&sort=name\">名称</a></th><th><a href=\"?dir=$path&sort=mtime\">最后更改</a></th><th><a href=\"?dir=$path&sort=size\">大小</a></th></tr><tr><th colspan=\"6\"><hr></th></tr>%s<tr><th colspan=\"6\"><hr></th></tr></table>".$footer;
+	$template_a = sprintf($header, $path).'<p>没有文件</p>'.$footer;
+	$template = sprintf($header, $path)."<table><th><img src=\"?gif=ico\" alt=\"[ICO]\"></th><th><a href=\"?dir=$path&sort=name\">名称</a></th><th><a href=\"?dir=$path&sort=mtime\">最后更改</a></th><th><a href=\"?dir=$path&sort=size\">大小</a></th></tr><tr><th colspan=\"6\"><hr></th></tr>%s<tr><th colspan=\"6\"><hr></th></tr></table>".$footer;
 	if(!$table) return sprintf($template_a, get_ver($data));
-	return sprintf($template, $table, "{$GLOBALS['total_files']} files, total {$GLOBALS['total_size']}.</br>".get_ver($data));
+	return sprintf($template, $table, "当前目录下共 {$GLOBALS['total_files']} 文件和文件夹, 总计 {$GLOBALS['total_size']}.</br>".get_ver($data));
 }
 
 $http_worker = new Worker("http://0.0.0.0:12101");
 $http_worker->count = 4;
 $http_worker->onMessage = function($connection, $data) {
 	$GLOBALS['time_start'] = microtime(true);
-	$GLOBALS['queries'] = 0;
 	$go_back = '</br><img src="?gif=parentdir" alt="[PARENTDIR]"> <a href="#" onClick="javascript:history.go(-1);">返回上一页</a>';
 	if(isset($_GET['gif'])) {
 		switch($_GET['gif']) {
